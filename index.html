@@ -1,0 +1,748 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Đếm Ngược Tết</title>
+<meta name="theme-color" content="#b5121b">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,600;0,800;1,500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red-deep: #7a0a12;
+    --red: #c3141f;
+    --gold: #f3d38a;
+    --gold-strong: #e8b75a;
+    --gold-dark: #b9863a;
+    --cream: #fff3dc;
+    --jade: #1fa79a;
+    --glass: rgba(120, 8, 16, .38);
+    --glass-border: rgba(243, 211, 138, .45);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    background: var(--red);
+    color: var(--cream);
+    font-family: "Be Vietnam Pro", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    user-select: none;
+  }
+
+  /* ---------- Background ---------- */
+  .bg {
+    position: fixed; inset: 0;
+    background: var(--red) url("bg/—Pngtree—spring festival new years day_1919537.png") center / cover no-repeat;
+  }
+  .bg::after {
+    content: ""; position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 55% 45% at 50% 50%, rgba(90, 0, 8, .35), transparent 70%),
+      radial-gradient(ellipse at center, transparent 55%, rgba(60, 0, 6, .45) 100%);
+  }
+
+  .emblem {
+    position: fixed; z-index: 1;
+    left: 50%; top: 50%;
+    width: min(82vh, 88vw); aspect-ratio: 1;
+    background: url("bg/—Pngtree—lunar new year 2027 digital_23553014.png") center / contain no-repeat;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    filter: drop-shadow(0 0 40px rgba(255, 200, 110, .35)) drop-shadow(0 12px 30px rgba(60, 0, 0, .5));
+    animation: emblem-in 1.6s .1s cubic-bezier(.2,.7,.2,1) forwards, float 9s 1.7s ease-in-out infinite;
+    pointer-events: none;
+    will-change: transform, opacity;
+  }
+  @keyframes emblem-in {
+    from { opacity: 0; transform: translate(-50%, -50%) scale(.85); }
+    to   { opacity: .4; transform: translate(-50%, -50%) scale(1); }
+  }
+  @keyframes float {
+    0%, 100% { opacity: .4; transform: translate(-50%, -50%) scale(1); }
+    50%      { opacity: .48; transform: translate(-50%, -51%) scale(1.02); }
+  }
+
+  canvas#petals { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2; }
+
+  /* ---------- Layout ---------- */
+  main {
+    position: relative; z-index: 3;
+    height: 100dvh;
+    display: grid;
+    place-items: center;
+    padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
+  }
+  .stage {
+    display: flex; flex-direction: column; align-items: center;
+    gap: clamp(.6rem, 2.2vh, 1.6rem);
+    text-align: center;
+    width: min(100%, 980px);
+  }
+
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: .9em;
+    font-size: clamp(.72rem, 1.4vw, .95rem);
+    letter-spacing: .38em; text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 500;
+    opacity: 0; animation: rise .9s .1s cubic-bezier(.2,.7,.2,1) forwards;
+  }
+  .eyebrow::before, .eyebrow::after {
+    content: ""; width: clamp(24px, 5vw, 60px); height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold));
+  }
+  .eyebrow::after { transform: scaleX(-1); }
+
+  h1 {
+    font-family: "Playfair Display", serif;
+    font-weight: 800;
+    font-size: clamp(2.3rem, 7.4vw, 5.6rem);
+    line-height: 1.15;
+    padding: 0 .08em .14em;
+    margin-bottom: -.14em;
+    background: linear-gradient(180deg, #fff6df 0%, var(--gold) 45%, var(--gold-strong) 70%, #fbe3a6 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 3px 0 rgba(110, 10, 10, .55)) drop-shadow(0 10px 28px rgba(60, 0, 0, .45));
+    opacity: 0; animation: rise 1s .25s cubic-bezier(.2,.7,.2,1) forwards;
+  }
+  .year {
+    font-family: "Playfair Display", serif; font-style: italic; font-weight: 500;
+    font-size: clamp(1.05rem, 2.4vw, 1.6rem);
+    color: var(--cream);
+    text-shadow: 0 2px 10px rgba(70, 0, 0, .55);
+    opacity: 0; animation: rise 1s .4s cubic-bezier(.2,.7,.2,1) forwards;
+  }
+  .year b { color: var(--gold); font-weight: 600; }
+
+  /* ---------- Countdown ---------- */
+  .countdown {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: clamp(.5rem, 1.8vw, 1.4rem);
+    width: 100%;
+    margin-top: clamp(.4rem, 1.5vh, 1rem);
+    opacity: 0; animation: rise 1s .55s cubic-bezier(.2,.7,.2,1) forwards;
+  }
+  .unit {
+    position: relative;
+    padding: clamp(.8rem, 2.6vh, 1.6rem) .4rem clamp(.7rem, 2vh, 1.2rem);
+    border-radius: clamp(14px, 2vw, 22px);
+    background: linear-gradient(160deg, rgba(160, 14, 24, .55), var(--glass));
+    border: 1px solid var(--glass-border);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 235, 190, .25),
+      inset 0 0 0 4px rgba(120, 8, 16, .25),
+      0 18px 40px -16px rgba(50, 0, 0, .7);
+    backdrop-filter: blur(10px) saturate(130%);
+    -webkit-backdrop-filter: blur(10px) saturate(130%);
+    overflow: hidden;
+  }
+  .unit::before {
+    content: ""; position: absolute; inset: 6px;
+    border-radius: inherit;
+    border: 1px dashed rgba(243, 211, 138, .22);
+    pointer-events: none;
+  }
+  .unit::after {
+    content: ""; position: absolute; top: 0; left: -60%; width: 40%; height: 100%;
+    background: linear-gradient(100deg, transparent, rgba(255, 240, 200, .14), transparent);
+    animation: sheen 6s ease-in-out infinite;
+  }
+  .unit:nth-child(2)::after { animation-delay: .4s; }
+  .unit:nth-child(3)::after { animation-delay: .8s; }
+  .unit:nth-child(4)::after { animation-delay: 1.2s; }
+  @keyframes sheen { 0%, 60% { left: -60%; } 100% { left: 130%; } }
+
+  .num {
+    position: relative;
+    height: 1.05em;
+    font-family: "Playfair Display", serif;
+    font-weight: 800;
+    font-size: clamp(2.2rem, 7.6vw, 5.4rem);
+    line-height: 1.05;
+    font-variant-numeric: tabular-nums lining-nums;
+    color: var(--gold);
+    text-shadow: 0 2px 0 rgba(110, 10, 10, .6), 0 0 24px rgba(255, 200, 110, .25);
+    overflow: hidden;
+  }
+  .num span {
+    position: absolute; inset: 0;
+    display: block;
+    transition: transform .6s cubic-bezier(.6, 0, .2, 1), opacity .6s ease, filter .6s ease;
+  }
+  .num span.out { transform: translateY(-70%); opacity: 0; filter: blur(4px); }
+  .num span.in-start { transform: translateY(70%); opacity: 0; filter: blur(4px); transition: none; }
+
+  .label {
+    margin-top: .45rem;
+    font-size: clamp(.62rem, 1.3vw, .85rem);
+    letter-spacing: .28em; text-transform: uppercase;
+    color: var(--cream);
+    opacity: .85;
+  }
+
+  .target {
+    font-size: clamp(.8rem, 1.6vw, 1rem);
+    color: var(--cream);
+    opacity: 0; animation: rise-soft 1s .75s ease forwards;
+    text-shadow: 0 1px 8px rgba(70, 0, 0, .6);
+  }
+  .target strong { color: var(--gold); font-weight: 600; }
+
+  .wish {
+    font-family: "Playfair Display", serif; font-style: italic;
+    font-size: clamp(.95rem, 2vw, 1.3rem);
+    color: var(--gold);
+    min-height: 1.5em;
+    transition: opacity .8s ease, transform .8s ease;
+    text-shadow: 0 2px 12px rgba(70, 0, 0, .6);
+  }
+  .wish.hide { opacity: 0; transform: translateY(6px); }
+
+  @keyframes rise { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: none; } }
+  @keyframes rise-soft { to { opacity: .9; } }
+
+  /* ---------- Music control ---------- */
+  .music {
+    position: fixed; z-index: 5;
+    right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom));
+    display: grid; place-items: center;
+    width: 40px; height: 40px; padding: 0;
+    border-radius: 50%;
+    border: 1px solid var(--glass-border);
+    background: rgba(110, 6, 14, .55);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    color: var(--cream);
+    font: 500 .78rem/1 "Be Vietnam Pro", sans-serif;
+    letter-spacing: .08em;
+    cursor: pointer;
+    transition: transform .25s ease, background .25s ease, box-shadow .25s ease;
+    box-shadow: 0 10px 30px -12px rgba(40, 0, 0, .8);
+  }
+  .music:hover { transform: translateY(-2px); background: rgba(140, 10, 20, .7); }
+  .music:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+  .disc {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: radial-gradient(circle, var(--red-deep) 0 22%, var(--gold) 23% 28%, #3a0a0a 29% 100%);
+    border: 1px solid var(--gold);
+    animation: spin 4s linear infinite;
+    animation-play-state: paused;
+  }
+  .music.playing .disc { animation-play-state: running; }
+  .music.playing { animation: ring 2.4s ease-out infinite; }
+  @keyframes ring {
+    0%   { box-shadow: 0 0 0 0 rgba(243, 211, 138, .45), 0 10px 30px -12px rgba(40, 0, 0, .8); }
+    100% { box-shadow: 0 0 0 12px rgba(243, 211, 138, 0), 0 10px 30px -12px rgba(40, 0, 0, .8); }
+  }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .hint {
+    position: fixed; z-index: 5; left: 50%; bottom: calc(max(16px, env(safe-area-inset-bottom)) + 52px);
+    transform: translateX(-50%);
+    font-size: .68rem; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--cream); opacity: .7;
+    transition: opacity .6s ease;
+    animation: pulse 2.4s ease-in-out infinite;
+    white-space: nowrap;
+  }
+  .hint.gone { opacity: 0 !important; animation: none; pointer-events: none; }
+  @keyframes pulse { 50% { opacity: .35; } }
+
+  /* ---------- Lịch nghỉ Tết ---------- */
+  .sched-btn {
+    position: fixed; z-index: 5; left: 50%;
+    bottom: max(16px, env(safe-area-inset-bottom));
+    transform: translateX(-50%);
+    display: inline-flex; align-items: center; gap: .5rem;
+    height: 40px; padding: 0 1rem;
+    border-radius: 999px;
+    border: 1px solid var(--glass-border);
+    background: rgba(110, 6, 14, .55);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    color: var(--cream);
+    font: 500 .74rem/1 "Be Vietnam Pro", sans-serif;
+    letter-spacing: .14em; text-transform: uppercase;
+    white-space: nowrap;
+    cursor: pointer;
+    box-shadow: 0 10px 30px -12px rgba(40, 0, 0, .8);
+    transition: transform .25s ease, background .25s ease;
+  }
+  .sched-btn svg { width: 15px; height: 15px; color: var(--gold); }
+  .sched-btn:hover { transform: translateX(-50%) translateY(-2px); background: rgba(140, 10, 20, .7); }
+  .sched-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+
+  dialog.sched {
+    margin: auto;
+    width: min(560px, calc(100vw - 32px));
+    max-height: calc(100dvh - 32px);
+    overflow: auto;
+    padding: clamp(1.2rem, 4vw, 2rem);
+    border: 1px solid var(--glass-border);
+    border-radius: 22px;
+    color: var(--cream);
+    background: linear-gradient(165deg, rgba(150, 12, 22, .94), rgba(95, 5, 12, .96));
+    box-shadow: inset 0 1px 0 rgba(255, 235, 190, .25), 0 30px 80px -20px rgba(30, 0, 0, .9);
+    opacity: 0; transform: translateY(16px) scale(.97);
+    transition: opacity .35s ease, transform .35s cubic-bezier(.2,.7,.2,1), overlay .35s allow-discrete, display .35s allow-discrete;
+  }
+  dialog.sched[open] { opacity: 1; transform: none; }
+  @starting-style { dialog.sched[open] { opacity: 0; transform: translateY(16px) scale(.97); } }
+  dialog.sched::backdrop {
+    background: rgba(40, 0, 4, 0);
+    transition: background .35s ease, overlay .35s allow-discrete, display .35s allow-discrete;
+  }
+  dialog.sched[open]::backdrop { background: rgba(40, 0, 4, .5); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+  @starting-style { dialog.sched[open]::backdrop { background: rgba(40, 0, 4, 0); } }
+
+  .sched-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+  .sched h2 {
+    font-family: "Playfair Display", serif; font-weight: 800;
+    font-size: clamp(1.4rem, 4.4vw, 1.9rem); line-height: 1.25;
+    color: var(--gold);
+  }
+  .sched .sub { margin-top: .3rem; font-size: .85rem; opacity: .85; }
+  .sched-close {
+    flex: none; width: 34px; height: 34px; border-radius: 50%;
+    display: grid; place-items: center;
+    border: 1px solid var(--glass-border); background: transparent; color: var(--gold);
+    cursor: pointer; transition: background .2s ease;
+  }
+  .sched-close:hover { background: rgba(243, 211, 138, .12); }
+  .sched-close svg { width: 14px; height: 14px; }
+
+  .days {
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: .4rem;
+    margin: 1.3rem 0 1rem;
+  }
+  .day {
+    display: flex; flex-direction: column; align-items: center; gap: .2rem;
+    padding: .65rem .2rem .55rem;
+    border-radius: 12px;
+    border: 1px solid rgba(243, 211, 138, .28);
+    background: rgba(255, 240, 210, .05);
+    text-align: center;
+  }
+  .day .wd { font-size: .62rem; letter-spacing: .12em; text-transform: uppercase; opacity: .75; }
+  .day .dd { font-family: "Playfair Display", serif; font-weight: 800; font-size: clamp(1.1rem, 3.6vw, 1.5rem); line-height: 1.1; color: var(--gold); font-variant-numeric: tabular-nums; }
+  .day .lunar { font-size: .62rem; opacity: .85; white-space: nowrap; }
+  .day.tet { background: linear-gradient(170deg, var(--gold), var(--gold-strong)); border-color: transparent; color: var(--red-deep); }
+  .day.tet .dd { color: var(--red-deep); }
+  .day.tet .wd, .day.tet .lunar { opacity: 1; font-weight: 600; }
+
+  .sched-info { display: grid; gap: .55rem; font-size: .88rem; line-height: 1.5; }
+  .sched-info div { display: flex; justify-content: space-between; gap: 1rem; padding-bottom: .55rem; border-bottom: 1px dashed rgba(243, 211, 138, .25); }
+  .sched-info div:last-child { border-bottom: 0; padding-bottom: 0; }
+  .sched-info dt { opacity: .8; }
+  .sched-info dd { color: var(--gold); font-weight: 600; text-align: right; }
+  .sched .note { margin-top: 1rem; font-size: .74rem; line-height: 1.55; opacity: .7; }
+
+  @media (max-width: 480px) {
+    .days { gap: .25rem; }
+    .day { padding: .5rem 0 .45rem; border-radius: 9px; }
+    .day .wd { font-size: .52rem; letter-spacing: .04em; }
+    .day .lunar { font-size: .5rem; }
+    .sched-info { font-size: .8rem; }
+  }
+
+  #yt { position: fixed; width: 200px; height: 200px; left: 0; bottom: 0; opacity: 0.01; pointer-events: none; z-index: 0; }
+
+  /* ---------- Celebration ---------- */
+  body.celebrate .countdown { display: none; }
+  body.celebrate h1 { animation: rise 1s forwards, glow 2.4s ease-in-out 1s infinite; }
+  @keyframes glow { 50% { filter: drop-shadow(0 3px 0 rgba(110,10,10,.55)) drop-shadow(0 0 40px rgba(255, 210, 120, .6)); } }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 560px) {
+    .countdown { grid-template-columns: repeat(2, 1fr); }
+    .eyebrow { letter-spacing: .26em; }
+    .hint { letter-spacing: .14em; }
+  }
+  @media (max-height: 480px) and (orientation: landscape) {
+    .stage { gap: .4rem; }
+    h1 { font-size: clamp(1.8rem, 6vw, 3rem); }
+    .num { font-size: clamp(1.8rem, 6vw, 3rem); }
+    .wish { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    canvas#petals { display: none; }
+  }
+</style>
+</head>
+<body>
+  <div class="bg" aria-hidden="true"></div>
+  <div class="emblem" aria-hidden="true"></div>
+  <canvas id="petals" aria-hidden="true"></canvas>
+
+  <main>
+    <section class="stage">
+      <p class="eyebrow">Đếm ngược đến Tết</p>
+      <h1 id="title">Chúc Mừng Năm Mới</h1>
+      <p class="year" id="yearline">Xuân <b id="canchi">Đinh Mùi</b> &middot; <span id="yearnum">2027</span></p>
+
+      <div class="countdown" role="timer" aria-live="off">
+        <div class="unit"><div class="num" data-k="d"><span>000</span></div><div class="label">Ngày</div></div>
+        <div class="unit"><div class="num" data-k="h"><span>00</span></div><div class="label">Giờ</div></div>
+        <div class="unit"><div class="num" data-k="m"><span>00</span></div><div class="label">Phút</div></div>
+        <div class="unit"><div class="num" data-k="s"><span>00</span></div><div class="label">Giây</div></div>
+      </div>
+
+      <p class="target" id="target">Giao thừa: <strong>00:00</strong></p>
+      <p class="wish" id="wish">An khang thịnh vượng</p>
+    </section>
+  </main>
+
+  <button class="music" id="musicBtn" type="button" title="Bật nhạc">
+    <span class="disc" aria-hidden="true"></span>
+    <span class="sr-only" id="musicTxt">Bật nhạc</span>
+  </button>
+
+  <button class="sched-btn" id="schedBtn" type="button" aria-haspopup="dialog">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="2.5"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>
+    Lịch nghỉ Tết
+  </button>
+
+  <dialog class="sched" id="sched" aria-labelledby="schedTitle">
+    <div class="sched-head">
+      <div>
+        <h2 id="schedTitle">Lịch nghỉ Tết</h2>
+        <p class="sub" id="schedSub"></p>
+      </div>
+      <button class="sched-close" id="schedClose" type="button" aria-label="Đóng">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="days" id="schedDays"></div>
+    <dl class="sched-info" id="schedInfo"></dl>
+    <p class="note" id="schedNote"></p>
+  </dialog>
+  <p class="hint" id="hint">Chạm vào màn hình để bật nhạc</p>
+  <div id="yt"></div>
+
+<script>
+(() => {
+  /* ================= Tết dates (Mùng 1, giờ Việt Nam UTC+7) ================= */
+  const TET = {
+    2026: "2026-02-17", 2027: "2027-02-06", 2028: "2028-01-26", 2029: "2029-02-13",
+    2030: "2030-02-03", 2031: "2031-01-23", 2032: "2032-02-11", 2033: "2033-01-31",
+    2034: "2034-02-19", 2035: "2035-02-08", 2036: "2036-01-28"
+  };
+  const CELEBRATE_DAYS = 3; // hiển thị lời chúc trong 3 ngày Tết
+  const STEMS = ["Giáp","Ất","Bính","Đinh","Mậu","Kỷ","Canh","Tân","Nhâm","Quý"];
+  const BRANCHES = ["Tý","Sửu","Dần","Mão","Thìn","Tỵ","Ngọ","Mùi","Thân","Dậu","Tuất","Hợi"];
+  const canChi = y => STEMS[(y - 4) % 10] + " " + BRANCHES[(y - 4) % 12];
+  const tetTime = y => new Date(TET[y] + "T00:00:00+07:00").getTime();
+
+  function pickTarget(now) {
+    const years = Object.keys(TET).map(Number).sort((a, b) => a - b);
+    for (const y of years) {
+      const t = tetTime(y);
+      if (now < t + CELEBRATE_DAYS * 864e5) return { year: y, time: t };
+    }
+    const y = years[years.length - 1];
+    return { year: y, time: tetTime(y) };
+  }
+
+  const $ = id => document.getElementById(id);
+  const nums = {};
+  document.querySelectorAll(".num").forEach(el => nums[el.dataset.k] = { el, val: null });
+
+  function setNum(k, text) {
+    const n = nums[k];
+    if (n.val === text) return;
+    const first = n.val === null;
+    n.val = text;
+    const old = n.el.querySelector("span:not(.out)");
+    if (first) { old.textContent = text; return; }
+    const span = document.createElement("span");
+    span.className = "in-start";
+    span.textContent = text;
+    n.el.appendChild(span);
+    old.classList.add("out");
+    old.addEventListener("transitionend", () => old.remove(), { once: true });
+    setTimeout(() => old.remove(), 800);
+    requestAnimationFrame(() => requestAnimationFrame(() => span.classList.remove("in-start")));
+  }
+
+  let target = pickTarget(Date.now());
+  const fmtDate = new Intl.DateTimeFormat("vi-VN", { weekday: "long", day: "2-digit", month: "2-digit", year: "numeric", timeZone: "Asia/Ho_Chi_Minh" });
+
+  function renderHeader() {
+    $("canchi").textContent = canChi(target.year);
+    $("yearnum").textContent = target.year;
+    $("target").innerHTML = "Mùng 1 Tết &middot; <strong>" + fmtDate.format(new Date(target.time)) + "</strong>";
+  }
+  renderHeader();
+
+  const pad = (v, l = 2) => String(v).padStart(l, "0");
+  function tick() {
+    const now = Date.now();
+    if (now >= target.time + CELEBRATE_DAYS * 864e5) { target = pickTarget(now); renderHeader(); }
+    let diff = target.time - now;
+    if (diff <= 0) {
+      document.body.classList.add("celebrate");
+      $("title").textContent = "Chúc Mừng Năm Mới";
+      if (!fireworksOn) startFireworks();
+      return;
+    }
+    document.body.classList.remove("celebrate");
+    const s = Math.floor(diff / 1000);
+    const d = Math.floor(s / 86400);
+    setNum("d", pad(d, d >= 100 ? 3 : 2));
+    setNum("h", pad(Math.floor(s % 86400 / 3600)));
+    setNum("m", pad(Math.floor(s % 3600 / 60)));
+    setNum("s", pad(s % 60));
+  }
+
+  // Sync ticks to the wall-clock second
+  (function loop() {
+    tick();
+    setTimeout(loop, 1000 - (Date.now() % 1000) + 5);
+  })();
+
+  /* ================= Rotating wishes ================= */
+  const WISHES = [
+    "An khang thịnh vượng", "Vạn sự như ý", "Phát tài phát lộc",
+    "Sức khỏe dồi dào", "Gia đình hạnh phúc", "Tấn tài tấn lộc", "Xuân sang phú quý"
+  ];
+  let wi = 0;
+  setInterval(() => {
+    const w = $("wish");
+    w.classList.add("hide");
+    setTimeout(() => { wi = (wi + 1) % WISHES.length; w.textContent = WISHES[wi]; w.classList.remove("hide"); }, 800);
+  }, 4200);
+
+  /* ================= Falling petals (mai vàng + đào) ================= */
+  const cv = $("petals"), ctx = cv.getContext("2d");
+  let W, H, DPR, petals = [], sparks = [], fireworksOn = false;
+  function resize() {
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = cv.width = innerWidth * DPR; H = cv.height = innerHeight * DPR;
+  }
+  addEventListener("resize", resize); resize();
+
+  const COLORS = ["#ffd45e", "#ffc93c", "#ffe08a", "#ffb7c5", "#ffd0da"];
+  function newPetal(top) {
+    const r = (6 + Math.random() * 7) * DPR;
+    return {
+      x: Math.random() * W, y: top ? -r * 2 : Math.random() * H, r,
+      vy: (0.35 + Math.random() * 0.6) * DPR, vx: (Math.random() - 0.3) * 0.4 * DPR,
+      sway: Math.random() * Math.PI * 2, swaySpeed: 0.01 + Math.random() * 0.02,
+      rot: Math.random() * Math.PI, vr: (Math.random() - 0.5) * 0.03,
+      flip: Math.random() * Math.PI, vf: 0.02 + Math.random() * 0.03,
+      color: COLORS[(Math.random() * COLORS.length) | 0], a: 0.65 + Math.random() * 0.35
+    };
+  }
+  const count = () => Math.round(Math.min(46, innerWidth / 30));
+  for (let i = 0; i < count(); i++) petals.push(newPetal(false));
+
+  function drawPetal(p) {
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    ctx.rotate(p.rot);
+    ctx.scale(1, Math.abs(Math.cos(p.flip)) * 0.8 + 0.2);
+    ctx.globalAlpha = p.a;
+    ctx.fillStyle = p.color;
+    ctx.beginPath();
+    ctx.moveTo(0, -p.r);
+    ctx.bezierCurveTo(p.r * 0.9, -p.r * 0.7, p.r * 0.8, p.r * 0.6, 0, p.r);
+    ctx.bezierCurveTo(-p.r * 0.8, p.r * 0.6, -p.r * 0.9, -p.r * 0.7, 0, -p.r);
+    ctx.fill();
+    ctx.globalAlpha = p.a * 0.5;
+    ctx.strokeStyle = "#c98a1c";
+    ctx.lineWidth = 0.6 * DPR;
+    ctx.beginPath(); ctx.moveTo(0, -p.r * 0.6); ctx.lineTo(0, p.r * 0.7); ctx.stroke();
+    ctx.restore();
+  }
+
+  /* ================= Fireworks (at Giao thừa) ================= */
+  function burst() {
+    const x = W * (0.2 + Math.random() * 0.6), y = H * (0.15 + Math.random() * 0.35);
+    const hue = [45, 40, 0, 170, 50][(Math.random() * 5) | 0];
+    const n = 70;
+    for (let i = 0; i < n; i++) {
+      const a = (i / n) * Math.PI * 2, sp = (1.5 + Math.random() * 3) * DPR;
+      sparks.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: 1, hue });
+    }
+  }
+  function startFireworks() {
+    fireworksOn = true;
+    burst();
+    setInterval(burst, 1100);
+  }
+
+  let last = performance.now();
+  function frame(t) {
+    const dt = Math.min((t - last) / 16.67, 3); last = t;
+    ctx.clearRect(0, 0, W, H);
+    for (const p of petals) {
+      p.sway += p.swaySpeed * dt;
+      p.x += (p.vx + Math.sin(p.sway) * 0.6 * DPR) * dt;
+      p.y += p.vy * dt;
+      p.rot += p.vr * dt; p.flip += p.vf * dt;
+      if (p.y > H + p.r * 2 || p.x < -50 * DPR || p.x > W + 50 * DPR) Object.assign(p, newPetal(true));
+      drawPetal(p);
+    }
+    if (sparks.length) {
+      ctx.globalCompositeOperation = "lighter";
+      for (let i = sparks.length - 1; i >= 0; i--) {
+        const s = sparks[i];
+        s.vx *= 0.985; s.vy = s.vy * 0.985 + 0.04 * DPR;
+        s.x += s.vx * dt; s.y += s.vy * dt; s.life -= 0.012 * dt;
+        if (s.life <= 0) { sparks.splice(i, 1); continue; }
+        ctx.fillStyle = `hsla(${s.hue}, 95%, 65%, ${s.life})`;
+        ctx.beginPath(); ctx.arc(s.x, s.y, 2 * DPR, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.globalCompositeOperation = "source-over";
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  /* ================= Lịch nghỉ Tết ================= */
+  const HOLIDAYS = {
+    2027: {
+      start: "2027-02-04", end: "2027-02-10", back: "2027-02-11",
+      lunar: ["28 Chạp", "29 Chạp", "Mùng 1", "Mùng 2", "Mùng 3", "Mùng 4", "Mùng 5"],
+      backLunar: "Mùng 6",
+      detail: "5 ngày Tết + 2 ngày nghỉ bù",
+      source: "Theo Thông báo 11483/TB-BNV của Bộ Nội vụ, áp dụng cho cán bộ, công chức, viên chức. Người lao động ở doanh nghiệp nghỉ theo phương án công ty chọn; học sinh, sinh viên theo thông báo của Sở GD&ĐT và nhà trường."
+    }
+  };
+  const WD = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
+  const WD_FULL = ["Chủ nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"];
+  const ymd = str => { const [y, m, d] = str.split("-").map(Number); return new Date(Date.UTC(y, m - 1, d)); };
+  const fullDate = dt => WD_FULL[dt.getUTCDay()] + ", " + pad(dt.getUTCDate()) + "/" + pad(dt.getUTCMonth() + 1) + "/" + dt.getUTCFullYear();
+
+  const dlg = $("sched");
+  function renderSchedule() {
+    const y = target.year, h = HOLIDAYS[y];
+    $("schedTitle").textContent = "Lịch nghỉ Tết " + canChi(y);
+    const days = $("schedDays"), info = $("schedInfo");
+    days.innerHTML = ""; info.innerHTML = "";
+    if (!h) {
+      $("schedSub").textContent = "Năm " + y;
+      days.style.display = "none";
+      $("schedNote").textContent = "Chưa có lịch nghỉ chính thức cho năm này.";
+      return;
+    }
+    days.style.display = "";
+    const s = ymd(h.start), total = Math.round((ymd(h.end) - s) / 864e5) + 1;
+    $("schedSub").textContent = "Nghỉ " + total + " ngày liên tục · " + h.detail;
+    for (let i = 0; i < total; i++) {
+      const dt = new Date(s.getTime() + i * 864e5);
+      const el = document.createElement("div");
+      el.className = "day";
+      el.innerHTML = `<span class="wd">${WD[dt.getUTCDay()]}</span><span class="dd">${pad(dt.getUTCDate())}</span><span class="lunar">${h.lunar[i] || ""}</span>`;
+      days.appendChild(el);
+    }
+    const rows = [
+      ["Bắt đầu nghỉ", fullDate(s)],
+      ["Nghỉ đến hết", fullDate(ymd(h.end))]
+    ];
+    for (const [k, v] of rows) {
+      const row = document.createElement("div");
+      row.innerHTML = `<dt>${k}</dt><dd>${v}</dd>`;
+      info.appendChild(row);
+    }
+    $("schedNote").textContent = h.source;
+  }
+
+  $("schedBtn").addEventListener("click", () => { renderSchedule(); dlg.showModal(); });
+  $("schedClose").addEventListener("click", () => dlg.close());
+  dlg.addEventListener("click", e => {
+    const r = dlg.getBoundingClientRect();
+    if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) dlg.close();
+  });
+
+  /* ================= Background music (YouTube, bắt đầu từ giây 25) ================= */
+  const VIDEO_ID = "y3C293qaADc", START = 25;
+  const btn = $("musicBtn"), txt = $("musicTxt"), hint = $("hint");
+  let player, ready = false, wantPlay = true, playing = false, unlocked = false;
+
+  // YouTube không phát khi mở file trực tiếp (file://) - cần chạy qua http
+  if (location.protocol === "file:") {
+    hint.textContent = "Mở trang qua http://localhost để nghe nhạc";
+  }
+
+  const tag = document.createElement("script");
+  tag.src = "https://www.youtube.com/iframe_api";
+  document.head.appendChild(tag);
+
+  window.onYouTubeIframeAPIReady = () => {
+    const vars = { autoplay: 1, start: START, controls: 0, disablekb: 1, playsinline: 1, rel: 0, loop: 1, playlist: VIDEO_ID };
+    if (location.protocol.startsWith("http")) vars.origin = location.origin;
+    player = new YT.Player("yt", {
+      videoId: VIDEO_ID,
+      width: 200, height: 200,
+      playerVars: vars,
+      events: {
+        onReady: e => {
+          ready = true;
+          e.target.setVolume(70);
+          e.target.seekTo(START, true);
+          e.target.playVideo();
+          if (unlocked) play();
+        },
+        onStateChange: e => {
+          const S = YT.PlayerState;
+          if (e.data === S.PLAYING) setPlaying(true);
+          else if (e.data === S.PAUSED) setPlaying(false);
+          else if (e.data === S.ENDED) { e.target.seekTo(START, true); e.target.playVideo(); }
+        },
+        onError: e => {
+          console.warn("YouTube player error", e.data);
+          txt.textContent = btn.title = "Lỗi nhạc";
+          hint.classList.remove("gone");
+          hint.textContent = location.protocol === "file:"
+            ? "Mở trang qua http://localhost để nghe nhạc"
+            : "Không phát được nhạc (mã lỗi " + e.data + ")";
+        }
+      }
+    });
+  };
+
+  // "Đang phát" chỉ tính khi có tiếng (trình duyệt có thể tự tắt tiếng để autoplay)
+  function setPlaying(v) {
+    playing = v && ready && !player.isMuted();
+    btn.classList.toggle("playing", playing);
+    txt.textContent = playing ? "Tắt nhạc" : "Bật nhạc";
+    btn.title = txt.textContent;
+    if (playing) hint.classList.add("gone");
+  }
+
+  function play() {
+    if (!ready) return;
+    player.unMute();
+    player.setVolume(70);
+    if (player.getCurrentTime() < START) player.seekTo(START, true);
+    player.playVideo();
+    setTimeout(() => setPlaying(player.getPlayerState() === YT.PlayerState.PLAYING), 400);
+  }
+
+  btn.addEventListener("click", () => {
+    unlocked = true;
+    if (!ready) return;
+    wantPlay = !playing;
+    if (wantPlay) play(); else { player.pauseVideo(); setPlaying(false); }
+    hint.classList.add("gone");
+  });
+
+  // Trình duyệt chặn tự phát có tiếng: bật nhạc ở lần tương tác đầu tiên
+  const GESTURES = ["pointerdown", "keydown", "touchend"];
+  const firstGesture = e => {
+    if (btn.contains(e.target)) return; // nút nhạc tự xử lý
+    unlocked = true;
+    if (wantPlay && !playing) play();
+    if (ready) GESTURES.forEach(ev => removeEventListener(ev, firstGesture));
+  };
+  GESTURES.forEach(ev => addEventListener(ev, firstGesture, { passive: true }));
+})();
+</script>
+</body>
+</html>
