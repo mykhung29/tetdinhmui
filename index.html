@@ -74,7 +74,8 @@
     height: 100dvh;
     display: grid;
     place-items: center;
-    padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
+    /* chừa chỗ dưới cho dòng nhắc + nút Lịch nghỉ Tết */
+    padding: max(16px, env(safe-area-inset-top)) 16px calc(max(16px, env(safe-area-inset-bottom)) + 96px);
   }
   .stage {
     display: flex; flex-direction: column; align-items: center;
@@ -185,13 +186,85 @@
     opacity: .85;
   }
 
-  .target {
-    font-size: clamp(.8rem, 1.6vw, 1rem);
-    color: var(--cream);
+  /* ---------- Timeline: hôm nay nằm đâu giữa 2 cái Tết ---------- */
+  .timeline {
+    width: min(100%, 640px);
+    margin-top: .2rem;
     opacity: 0; animation: rise-soft 1s .75s ease forwards;
-    text-shadow: 0 1px 8px rgba(70, 0, 0, .6);
   }
-  .target strong { color: var(--gold); font-weight: 600; }
+  .tl-track {
+    position: relative;
+    height: 4px; margin: 3.1rem 6px 0;
+    border-radius: 2px;
+    background: rgba(255, 240, 210, .2);
+    box-shadow: inset 0 1px 2px rgba(60, 0, 0, .35);
+  }
+  .tl-track::before, .tl-track::after {
+    content: ""; position: absolute; top: 50%;
+    width: 10px; height: 10px; border-radius: 50%;
+    border: 2px solid var(--gold); background: var(--red-deep);
+    z-index: 2; /* nằm trên thanh vàng */
+    transform: translate(-50%, -50%);
+  }
+  .tl-track::before { left: 0; background: var(--gold); }
+  .tl-track::after { left: 100%; }
+  .tl-fill {
+    position: absolute; left: 0; top: 0; bottom: 0;
+    width: var(--p, 0%);
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--gold-dark), var(--gold));
+    box-shadow: 0 0 10px rgba(243, 211, 138, .55);
+    transition: width 1.8s cubic-bezier(.2, .7, .2, 1);
+  }
+  .tl-dot {
+    position: absolute; top: 50%; left: var(--p, 0%); z-index: 3;
+    width: 20px; height: 20px; border-radius: 50%;
+    /* nhân kem + vòng vàng, viền đỏ sẫm tách hẳn chấm khỏi thanh */
+    background: radial-gradient(circle, var(--cream) 0 32%, var(--gold) 34% 100%);
+    border: 2px solid var(--red-deep);
+    transform: translate(-50%, -50%);
+    transition: left 1.8s cubic-bezier(.2, .7, .2, 1);
+    animation: dot-pulse 2.2s ease-out infinite;
+  }
+  @keyframes dot-pulse {
+    0%   { box-shadow: 0 0 0 2px var(--gold), 0 2px 8px rgba(60, 0, 0, .6), 0 0 0 2px rgba(255, 230, 170, .6); }
+    100% { box-shadow: 0 0 0 2px var(--gold), 0 2px 8px rgba(60, 0, 0, .6), 0 0 0 14px rgba(255, 230, 170, 0); }
+  }
+  .tl-label {
+    position: absolute; bottom: calc(100% + 12px); left: 50%;
+    transform: translateX(-50%);
+    padding: .32rem .65rem;
+    border-radius: 9px;
+    border: 1px solid var(--glass-border);
+    background: rgba(110, 6, 14, .7);
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    font-size: .7rem; line-height: 1.4; white-space: nowrap;
+    color: var(--cream);
+    box-shadow: 0 8px 20px -10px rgba(40, 0, 0, .8);
+  }
+  .tl-label b { color: var(--gold); font-weight: 600; }
+  .tl-label .lunar { display: block; opacity: .8; }
+  .tl-label::after {
+    content: ""; position: absolute; top: 100%; left: 50%;
+    border: 5px solid transparent; border-top-color: var(--glass-border);
+    transform: translateX(-50%);
+  }
+  .tl-label.left  { left: -8px; transform: none; }
+  .tl-label.left::after  { left: 8px; transform: none; }
+  .tl-label.right { left: auto; right: -8px; transform: none; }
+  .tl-label.right::after { left: auto; right: 8px; transform: none; }
+  .tl-ends {
+    display: grid; grid-template-columns: 1fr auto 1fr; align-items: start; gap: .5rem;
+    margin-top: .6rem;
+    font-size: .68rem; line-height: 1.35;
+    color: var(--cream);
+    text-shadow: 0 1px 6px rgba(70, 0, 0, .6);
+  }
+  .tl-ends > span:first-child { text-align: left; }
+  .tl-ends > span:last-child { text-align: right; }
+  .tl-ends b { display: block; color: var(--gold); font-weight: 600; letter-spacing: .04em; }
+  .tl-ends .mid { opacity: .75; font-style: italic; }
+  body.celebrate .timeline { display: none; }
 
   .wish {
     font-family: "Playfair Display", serif; font-style: italic;
@@ -361,12 +434,17 @@
     .countdown { grid-template-columns: repeat(2, 1fr); }
     .eyebrow { letter-spacing: .26em; }
     .hint { letter-spacing: .14em; }
+    .tl-label { font-size: .64rem; }
+    .tl-ends { font-size: .62rem; }
+    .tl-ends .mid { display: none; }
   }
   @media (max-height: 480px) and (orientation: landscape) {
     .stage { gap: .4rem; }
     h1 { font-size: clamp(1.8rem, 6vw, 3rem); }
     .num { font-size: clamp(1.8rem, 6vw, 3rem); }
     .wish { display: none; }
+    .tl-ends { display: none; }
+    .tl-track { margin-top: 2.6rem; }
   }
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
@@ -392,7 +470,17 @@
         <div class="unit"><div class="num" data-k="s"><span>00</span></div><div class="label">Giây</div></div>
       </div>
 
-      <p class="target" id="target">Giao thừa: <strong>00:00</strong></p>
+      <div class="timeline" id="timeline" aria-label="Hôm nay trên chặng đường đến Tết">
+        <div class="tl-track">
+          <div class="tl-fill"></div>
+          <div class="tl-dot"><span class="tl-label" id="tlLabel"></span></div>
+        </div>
+        <div class="tl-ends">
+          <span id="tlStart"></span>
+          <span class="mid" id="tlMid"></span>
+          <span id="tlEnd"></span>
+        </div>
+      </div>
       <p class="wish" id="wish">An khang thịnh vượng</p>
     </section>
   </main>
@@ -426,26 +514,103 @@
 
 <script>
 (() => {
-  /* ================= Tết dates (Mùng 1, giờ Việt Nam UTC+7) ================= */
-  const TET = {
-    2026: "2026-02-17", 2027: "2027-02-06", 2028: "2028-01-26", 2029: "2029-02-13",
-    2030: "2030-02-03", 2031: "2031-01-23", 2032: "2032-02-11", 2033: "2033-01-31",
-    2034: "2034-02-19", 2035: "2035-02-08", 2036: "2036-01-28"
-  };
+  /* ================= Âm lịch Việt Nam (thuật toán Hồ Ngọc Đức, múi giờ +7) ================= */
+  const Lunar = (() => {
+    const { floor, sin, PI } = Math, TZ = 7, dr = PI / 180;
+    function jdFromDate(dd, mm, yy) {
+      const a = floor((14 - mm) / 12), y = yy + 4800 - a, m = mm + 12 * a - 3;
+      let jd = dd + floor((153 * m + 2) / 5) + 365 * y + floor(y / 4) - floor(y / 100) + floor(y / 400) - 32045;
+      if (jd < 2299161) jd = dd + floor((153 * m + 2) / 5) + 365 * y + floor(y / 4) - 32083;
+      return jd;
+    }
+    function newMoonDay(k) {
+      const T = k / 1236.85, T2 = T * T, T3 = T2 * T;
+      let Jd1 = 2415020.75933 + 29.53058868 * k + 0.0001178 * T2 - 0.000000155 * T3;
+      Jd1 += 0.00033 * sin((166.56 + 132.87 * T - 0.009173 * T2) * dr);
+      const M = 359.2242 + 29.10535608 * k - 0.0000333 * T2 - 0.00000347 * T3;
+      const Mpr = 306.0253 + 385.81691806 * k + 0.0107306 * T2 + 0.00001236 * T3;
+      const F = 21.2964 + 390.67050646 * k - 0.0016528 * T2 - 0.00000239 * T3;
+      let C1 = (0.1734 - 0.000393 * T) * sin(M * dr) + 0.0021 * sin(2 * dr * M);
+      C1 = C1 - 0.4068 * sin(Mpr * dr) + 0.0161 * sin(dr * 2 * Mpr);
+      C1 = C1 - 0.0004 * sin(dr * 3 * Mpr);
+      C1 = C1 + 0.0104 * sin(dr * 2 * F) - 0.0051 * sin(dr * (M + Mpr));
+      C1 = C1 - 0.0074 * sin(dr * (M - Mpr)) + 0.0004 * sin(dr * (2 * F + M));
+      C1 = C1 - 0.0004 * sin(dr * (2 * F - M)) - 0.0006 * sin(dr * (2 * F + Mpr));
+      C1 = C1 + 0.0010 * sin(dr * (2 * F - Mpr)) + 0.0005 * sin(dr * (2 * Mpr + M));
+      const deltat = T < -11
+        ? 0.001 + 0.000839 * T + 0.0002261 * T2 - 0.00000845 * T3 - 0.000000081 * T * T3
+        : -0.000278 + 0.000265 * T + 0.000262 * T2;
+      return floor(Jd1 + C1 - deltat + 0.5 + TZ / 24);
+    }
+    function sunLongitude(jdn) {
+      const T = (jdn - 2451545.5 - TZ / 24) / 36525, T2 = T * T;
+      const M = 357.52910 + 35999.05030 * T - 0.0001559 * T2 - 0.00000048 * T * T2;
+      const L0 = 280.46645 + 36000.76983 * T + 0.0003032 * T2;
+      let DL = (1.914600 - 0.004817 * T - 0.000014 * T2) * sin(dr * M);
+      DL += (0.019993 - 0.000101 * T) * sin(dr * 2 * M) + 0.000290 * sin(dr * 3 * M);
+      let L = (L0 + DL) * dr;
+      L -= PI * 2 * floor(L / (PI * 2));
+      return floor(L / PI * 6);
+    }
+    function month11(yy) {
+      const off = jdFromDate(31, 12, yy) - 2415021, k = floor(off / 29.530588853);
+      let nm = newMoonDay(k);
+      if (sunLongitude(nm) >= 9) nm = newMoonDay(k - 1);
+      return nm;
+    }
+    function leapOffset(a11) {
+      const k = floor((a11 - 2415021.076998695) / 29.530588853 + 0.5);
+      let last, i = 1, arc = sunLongitude(newMoonDay(k + i));
+      do { last = arc; i++; arc = sunLongitude(newMoonDay(k + i)); } while (arc !== last && i < 14);
+      return i - 1;
+    }
+    // -> { day, month, year, leap }
+    function fromSolar(dd, mm, yy) {
+      const dayNumber = jdFromDate(dd, mm, yy);
+      const k = floor((dayNumber - 2415021.076998695) / 29.530588853);
+      let monthStart = newMoonDay(k + 1);
+      if (monthStart > dayNumber) monthStart = newMoonDay(k);
+      let a11 = month11(yy), b11 = a11, year;
+      if (a11 >= monthStart) { year = yy; a11 = month11(yy - 1); }
+      else { year = yy + 1; b11 = month11(yy + 1); }
+      const day = dayNumber - monthStart + 1, diff = floor((monthStart - a11) / 29);
+      let leap = false, month = diff + 11;
+      if (b11 - a11 > 365) {
+        const lm = leapOffset(a11);
+        if (diff >= lm) { month = diff + 10; if (diff === lm) leap = true; }
+      }
+      if (month > 12) month -= 12;
+      if (month >= 11 && diff < 4) year -= 1;
+      return { day, month, year, leap };
+    }
+    return { fromSolar };
+  })();
+
+  /* ================= Ngày Tết (Mùng 1 tháng Giêng, giờ Việt Nam UTC+7) ================= */
+  const VN = 7 * 3600e3;
+  const vnDate = ms => { const d = new Date(ms + VN); return { y: d.getUTCFullYear(), m: d.getUTCMonth() + 1, d: d.getUTCDate(), wd: d.getUTCDay() }; };
+  const tetCache = {};
+  function tetYMD(y) {
+    if (tetCache[y]) return tetCache[y];
+    for (let t = Date.UTC(y, 0, 19); t <= Date.UTC(y, 1, 21); t += 864e5) {
+      const d = new Date(t), l = Lunar.fromSolar(d.getUTCDate(), d.getUTCMonth() + 1, y);
+      if (l.day === 1 && l.month === 1 && !l.leap) return (tetCache[y] = { y, m: d.getUTCMonth() + 1, d: d.getUTCDate() });
+    }
+  }
+  const TET = new Proxy({}, { get: (_, y) => { const t = tetYMD(+y); return `${t.y}-${String(t.m).padStart(2, "0")}-${String(t.d).padStart(2, "0")}`; } });
+  const tetTime = y => { const t = tetYMD(y); return Date.UTC(t.y, t.m - 1, t.d) - VN; };
   const CELEBRATE_DAYS = 3; // hiển thị lời chúc trong 3 ngày Tết
   const STEMS = ["Giáp","Ất","Bính","Đinh","Mậu","Kỷ","Canh","Tân","Nhâm","Quý"];
   const BRANCHES = ["Tý","Sửu","Dần","Mão","Thìn","Tỵ","Ngọ","Mùi","Thân","Dậu","Tuất","Hợi"];
   const canChi = y => STEMS[(y - 4) % 10] + " " + BRANCHES[(y - 4) % 12];
-  const tetTime = y => new Date(TET[y] + "T00:00:00+07:00").getTime();
 
   function pickTarget(now) {
-    const years = Object.keys(TET).map(Number).sort((a, b) => a - b);
-    for (const y of years) {
+    const y0 = vnDate(now).y;
+    for (const y of [y0, y0 + 1]) {
       const t = tetTime(y);
       if (now < t + CELEBRATE_DAYS * 864e5) return { year: y, time: t };
     }
-    const y = years[years.length - 1];
-    return { year: y, time: tetTime(y) };
+    return { year: y0 + 1, time: tetTime(y0 + 1) };
   }
 
   const $ = id => document.getElementById(id);
@@ -466,23 +631,45 @@
     old.classList.add("out");
     old.addEventListener("transitionend", () => old.remove(), { once: true });
     setTimeout(() => old.remove(), 800);
-    requestAnimationFrame(() => requestAnimationFrame(() => span.classList.remove("in-start")));
+    void span.offsetWidth; // ép trình duyệt tính vị trí ban đầu rồi mới chạy hiệu ứng (không phụ thuộc rAF)
+    span.classList.remove("in-start");
   }
 
   let target = pickTarget(Date.now());
-  const fmtDate = new Intl.DateTimeFormat("vi-VN", { weekday: "long", day: "2-digit", month: "2-digit", year: "numeric", timeZone: "Asia/Ho_Chi_Minh" });
+  const pad = (v, l = 2) => String(v).padStart(l, "0");
+  const THU = ["Chủ nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"];
+  const THANG_AM = ["Giêng", "Hai", "Ba", "Tư", "Năm", "Sáu", "Bảy", "Tám", "Chín", "Mười", "Mười Một", "Chạp"];
+  const fmtYMD = t => pad(t.d) + "/" + pad(t.m) + "/" + t.y;
 
   function renderHeader() {
     $("canchi").textContent = canChi(target.year);
     $("yearnum").textContent = target.year;
-    $("target").innerHTML = "Mùng 1 Tết &middot; <strong>" + fmtDate.format(new Date(target.time)) + "</strong>";
+    renderTimeline();
+  }
+
+  // Timeline: từ Tết năm trước đến Tết sắp tới, chấm sáng là hôm nay
+  let tlDay = "";
+  function renderTimeline() {
+    const now = Date.now(), today = vnDate(now);
+    tlDay = fmtYMD(today);
+    const startT = tetTime(target.year - 1), endT = target.time;
+    const p = Math.min(1, Math.max(0, (now - startT) / (endT - startT))) * 100;
+    const lu = Lunar.fromSolar(today.d, today.m, today.y);
+    const label = $("tlLabel");
+    label.innerHTML = `<b>Hôm nay</b> &middot; ${THU[today.wd]}, ${tlDay}` +
+      `<span class="lunar">Ngày ${lu.day} tháng ${THANG_AM[lu.month - 1]}${lu.leap ? " nhuận" : ""} năm ${canChi(lu.year)}</span>`;
+    label.className = "tl-label" + (p < 22 ? " left" : p > 78 ? " right" : "");
+    $("tlStart").innerHTML = `<b>Tết ${canChi(target.year - 1)}</b>${fmtYMD(tetYMD(target.year - 1))}`;
+    $("tlEnd").innerHTML = `<b>Tết ${canChi(target.year)}</b>${fmtYMD(tetYMD(target.year))}`;
+    $("tlMid").textContent = "Đã đi được " + Math.floor(p) + "% chặng đường";
+    // chạy từ 0 lên khi mới vào trang
+    setTimeout(() => $("timeline").style.setProperty("--p", p.toFixed(3) + "%"), 60);
   }
   renderHeader();
-
-  const pad = (v, l = 2) => String(v).padStart(l, "0");
   function tick() {
     const now = Date.now();
     if (now >= target.time + CELEBRATE_DAYS * 864e5) { target = pickTarget(now); renderHeader(); }
+    else if (fmtYMD(vnDate(now)) !== tlDay) renderTimeline(); // qua ngày mới
     let diff = target.time - now;
     if (diff <= 0) {
       document.body.classList.add("celebrate");
